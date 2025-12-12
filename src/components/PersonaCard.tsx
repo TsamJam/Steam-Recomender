@@ -6,7 +6,7 @@ import {
   PolarRadiusAxis,
   ResponsiveContainer,
 } from "recharts";
-import { User, Clock, Gamepad2, Target } from "lucide-react"; // Sparkles dihapus
+import { User, Clock, Gamepad2, Target, Trophy } from "lucide-react"; // Trophy ditambah untuk icon cluster
 
 interface PersonaData {
   steam_id: string;
@@ -14,6 +14,7 @@ interface PersonaData {
   avatar_url?: string;
   total_playtime_hours: number;
   dominant_archetype: string;
+  cluster_label?: string; // <--- FIELD BARU: Julukan Cluster (The Specialist, dll)
   dna_breakdown: Record<string, number>;
   games_analyzed: number;
 }
@@ -25,6 +26,7 @@ interface PersonaCardProps {
 export const PersonaCard = ({ data }: PersonaCardProps) => {
   if (!data) return null;
 
+  // Transform data untuk Recharts
   const chartData = Object.entries(data.dna_breakdown).map(([genre, value]) => ({
     subject: genre,
     A: value,
@@ -35,74 +37,79 @@ export const PersonaCard = ({ data }: PersonaCardProps) => {
   const domainMax = maxValue > 0 ? Math.ceil(maxValue) : 100;
 
   return (
-    // --- PERUBAHAN DI CONTAINER UTAMA ---
-    // 1. rounded-xl -> rounded-md (Lebih kotak)
-    // 2. bg-[#16202d] -> bg-[#1b2838] (Warna header Steam yang lebih gelap)
-    // 3. Menambahkan border-t-4 border-t-[#66c0f4] (Aksen garis biru di atas ala Steam)
-    // 4. Shadow diubah jadi lebih subtle/flat
-    <div className="bg-[#1b2838] border-x border-b border-[#0a1017] border-t-4 border-t-[#66c0f4] p-6 rounded-md shadow-[0_4px_12px_rgba(0,0,0,0.5)] relative overflow-hidden mb-8 animate-in fade-in slide-in-from-top-4">
+    <div className="w-full bg-[#1b2838] border border-[#2a475e] rounded-md p-6 mb-8 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-700 relative overflow-hidden">
       
-      {/* Dekorasi Sparkles DIHAPUS agar lebih bersih ala Steam client */}
+      {/* Background Accent (Glow halus di belakang) */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-[#66c0f4]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-      <div className="flex flex-col md:flex-row gap-8 items-center relative z-10">
+      <div className="flex flex-col md:flex-row items-center relative z-10">
         
-        {/* === BAGIAN KIRI === */}
-        <div className="flex-1 w-full space-y-6">
-          <div className="flex items-center gap-4">
+        {/* === BAGIAN KIRI (INFO USER) === */}
+        <div className="flex-1 text-center md:text-left mb-6 md:mb-0 md:mr-8 w-full">
+          <div className="flex flex-col md:flex-row items-center">
             
-            {/* --- PERUBAHAN DI AVATAR --- */}
-            <div className="relative shrink-0">
-                {/* 1. rounded-full -> rounded-md (Jadi kotak) */}
-                {/* 2. Border dipertegas */}
-                <div className="w-20 h-20 rounded-md border-2 border-[#66c0f4] overflow-hidden bg-[#0a1017] flex items-center justify-center shadow-sm">
-                  {data.avatar_url ? (
-                    <img 
-                      src={data.avatar_url} 
-                      alt="Steam Avatar" 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <User className="w-10 h-10 text-[#66c0f4]" />
-                  )}
-                </div>
+            {/* AVATAR DENGAN BADGE CLUSTER */}
+            <div className="relative shrink-0 mb-4 md:mb-0 mr-0 md:mr-6">
+              <div className="relative group">
+                {/* Efek Glow Avatar */}
+                <div className="absolute -inset-1 bg-gradient-to-br from-[#66c0f4] to-[#1b2838] rounded-full blur opacity-25 group-hover:opacity-75 transition duration-1000"></div>
+                <img
+                  src={data.avatar_url || "/placeholder.svg"}
+                  alt="Avatar"
+                  className="relative w-28 h-28 rounded-full border-2 border-[#66c0f4] shadow-lg object-cover bg-[#16202d]"
+                />
+                
+                {/* 🔥 BADGE CLUSTER LABEL (BARU) 🔥 */}
+                {data.cluster_label && (
+                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-600 to-orange-600 text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full whitespace-nowrap shadow-md border border-orange-400/50 flex items-center gap-1 z-20">
+                    <Trophy className="w-3 h-3 text-yellow-200" />
+                    {data.cluster_label}
+                  </div>
+                )}
+              </div>
             </div>
 
+            {/* USERNAME & STEAM ID */}
             <div>
-              <h3 className="text-[#8f98a0] text-xs font-bold uppercase tracking-widest mb-1">
-                Steam Profile Analysis
-              </h3>
-              
-              {/* Username lebih menonjol */}
-              {data.username ? (
-                 <h2 className="text-2xl font-bold text-white mb-2 truncate">{data.username}</h2>
-              ) : (
-                 <h2 className="text-xl font-bold text-gray-400 mb-2">Unknown User</h2>
-              )}
-
-              {/* Badge Style: Lebih solid */}
-              <div className="inline-flex items-center px-3 py-1 rounded-sm text-sm font-medium bg-[#2a475e] text-white border border-[#4b6b84]">
-                <Target size={14} className="mr-2 text-[#66c0f4]"/>
-                {data.dominant_archetype}
+              <h2 className="text-3xl font-bold text-white tracking-wide mb-1 drop-shadow-md">
+                {data.username || "Unknown Player"}
+              </h2>
+              <div className="flex items-center justify-center md:justify-start gap-2 text-[#66c0f4] text-sm font-mono bg-[#16202d]/50 px-2 py-1 rounded w-fit mx-auto md:mx-0 border border-[#2a475e]/50">
+                <User className="w-3 h-3" />
+                <span>{data.steam_id}</span>
               </div>
             </div>
           </div>
 
-          {/* Grid Statistik Kecil */}
-          <div className="grid grid-cols-2 gap-3 mt-4 bg-[#121923] p-4 rounded-md border border-[#0a1017] inset-shadow-sm">
-            <div className="p-2">
-              <div className="flex items-center gap-2 text-[#8f98a0] mb-1">
-                <Clock size={14} />
-                <span className="text-[10px] font-bold uppercase">Total Playtime</span>
+          {/* GRID STATISTIK */}
+          <div className="grid grid-cols-2 gap-4 mt-6">
+            {/* Playtime */}
+            <div className="bg-[#16202d] p-3 rounded border border-[#2a475e] hover:border-[#66c0f4] transition-colors group">
+              <div className="flex items-center gap-2 mb-1 text-[#8f98a0] text-xs uppercase font-bold tracking-wider group-hover:text-[#66c0f4]">
+                <Clock className="w-3 h-3" />
+                <span>Total Playtime</span>
               </div>
-              <div className="text-lg font-bold text-[#66c0f4]">
-                {data.total_playtime_hours.toLocaleString()} <span className="text-sm text-[#8f98a0]">hours</span>
+              <div className="text-lg font-bold text-white">
+                {data.total_playtime_hours} <span className="text-sm text-[#8f98a0]">hours</span>
               </div>
             </div>
 
-            <div className="p-2 border-l border-[#2a475e]/30">
-              <div className="flex items-center gap-2 text-[#8f98a0] mb-1">
-                <Gamepad2 size={14} />
-                <span className="text-[10px] font-bold uppercase">Games Analyzed</span>
+            {/* Dominant Archetype */}
+            <div className="bg-[#16202d] p-3 rounded border border-[#2a475e] hover:border-[#a3cf06] transition-colors group">
+              <div className="flex items-center gap-2 mb-1 text-[#8f98a0] text-xs uppercase font-bold tracking-wider group-hover:text-[#a3cf06]">
+                <Target className="w-3 h-3" />
+                <span>Main Archetype</span>
+              </div>
+              <div className="text-lg font-bold text-white">
+                {data.dominant_archetype}
+              </div>
+            </div>
+
+            {/* Games Analyzed */}
+            <div className="bg-[#16202d] p-3 rounded border border-[#2a475e] hover:border-[#d63031] transition-colors group col-span-2">
+              <div className="flex items-center gap-2 mb-1 text-[#8f98a0] text-xs uppercase font-bold tracking-wider group-hover:text-[#d63031]">
+                <Gamepad2 className="w-3 h-3" />
+                <span>Library Analyzed</span>
               </div>
               <div className="text-lg font-bold text-white">
                 {data.games_analyzed} <span className="text-sm text-[#8f98a0]">titles</span>
@@ -117,14 +124,13 @@ export const PersonaCard = ({ data }: PersonaCardProps) => {
             <RadarChart 
               cx="50%" 
               cy="50%" 
-              outerRadius="80%" 
+              outerRadius="75%" 
               data={chartData}
             >
-              {/* Grid warna lebih gelap dan tegas */}
               <PolarGrid stroke="#2a475e" strokeWidth={1} />
               <PolarAngleAxis 
                 dataKey="subject" 
-                tick={{ fill: "#8f98a0", fontSize: 12, fontWeight: "bold" }} 
+                tick={{ fill: "#8f98a0", fontSize: 11, fontWeight: "bold" }} 
               />
               <PolarRadiusAxis 
                 angle={30} 
