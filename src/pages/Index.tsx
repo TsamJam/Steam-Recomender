@@ -100,10 +100,10 @@ const Index = () => {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#1b2838] via-[#0a1017] to-[#0a1017] z-0"></div>
         <div className="relative z-10 max-w-3xl mx-auto">
           <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500">
-            Steam Scout
+            Steam Recommendation
           </h1>
           <p className="text-lg md:text-xl text-gray-400 mb-10">
-            Temukan game favoritmu berikutnya menggunakan AI.
+            Temukan game favoritmu berikutnya
           </p>
 
           {/* SEARCH BOX CONTAINER */}
